@@ -1,0 +1,80 @@
+name: Lab3 CI
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: lab3-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test-java:
+    name: Build and test Java services
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - user-service
+          - patient-service
+          - message-service
+          - search-service
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Run tests
+        working-directory: ${{ matrix.service }}
+        run: mvn clean test
+
+      - name: Build package
+        working-directory: ${{ matrix.service }}
+        run: mvn clean package -DskipTests
+
+  verify-node-and-frontend:
+    name: Verify Node service and frontend
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - image-service
+          - frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.dir }}
+        run: npm install
+
+      - name: Build frontend
+        if: matrix.dir == 'frontend'
+        working-directory: frontend
+        run: npm run build
+
+      - name: Smoke check image-service
+        if: matrix.dir == 'image-service'
+        working-directory: image-service
+        run: node -e "console.log('image-service dependencies OK')"
