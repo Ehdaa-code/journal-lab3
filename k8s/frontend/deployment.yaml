@@ -1,0 +1,49 @@
+# frontend deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: journal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: journal-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: REACT_APP_USER_SERVICE_URL
+              value: http://localhost:8081
+            - name: REACT_APP_PATIENT_SERVICE_URL
+              value: http://localhost:8082
+            - name: REACT_APP_MESSAGE_SERVICE_URL
+              value: http://localhost:8083
+            - name: REACT_APP_IMAGE_SERVICE_URL
+              value: http://localhost:8084
+            - name: REACT_APP_SEARCH_SERVICE_URL
+              value: http://localhost:8085
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+
+
+
+
+

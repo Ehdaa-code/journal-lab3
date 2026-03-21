@@ -1,0 +1,13 @@
+# message-service service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-service
+  namespace: journal
+spec:
+  selector:
+    app: message-service
+  ports:
+    - port: 8083
+      targetPort: 8083
+  type: ClusterIP

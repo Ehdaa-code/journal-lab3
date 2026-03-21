@@ -1,0 +1,46 @@
+# image-service deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-service
+  namespace: journal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-service
+  template:
+    metadata:
+      labels:
+        app: image-service
+    spec:
+      containers:
+        - name: image-service
+          image: image-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8084
+          env:
+            - name: PORT
+              value: "8084"
+            - name: DATA_DIR
+              value: /app/data
+          volumeMounts:
+            - name: image-data
+              mountPath: /app/data
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8084
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8084
+            initialDelaySeconds: 20
+            periodSeconds: 10
+      volumes:
+        - name: image-data
+          persistentVolumeClaim:
+            claimName: image-service-pvc

@@ -1,0 +1,14 @@
+# patient-service service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: patient-service
+  namespace: journal
+spec:
+  selector:
+    app: patient-service
+  ports:
+    - port: 8082
+      targetPort: 8082
+  type: ClusterIP

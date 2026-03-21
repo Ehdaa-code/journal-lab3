@@ -1,0 +1,11 @@
+# mysql-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: journal
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS user_db;
+    CREATE DATABASE IF NOT EXISTS patient_db;
+    CREATE DATABASE IF NOT EXISTS message_db;

@@ -1,0 +1,12 @@
+# image-service pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: image-service-pvc
+  namespace: journal
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

@@ -1,0 +1,49 @@
+# search-service deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+  namespace: journal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-service
+  template:
+    metadata:
+      labels:
+        app: search-service
+    spec:
+      containers:
+        - name: search-service
+          image: search-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8085
+          env:
+            - name: QUARKUS_DATASOURCE_REACTIVE_URL
+              value: mysql://mysql:3306/patient_db
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: root
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /api/search/patients?name=test
+              port: 8085
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/search/patients?name=test
+              port: 8085
+            initialDelaySeconds: 40
+            periodSeconds: 10
+
+
+
+
+

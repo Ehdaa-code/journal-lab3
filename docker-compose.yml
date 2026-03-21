@@ -1,0 +1,125 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: journal-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - journal-network
+
+  user-service:
+    build:
+      context: ./user-service
+    container_name: user-service
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/user_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8081:8081"
+    networks:
+      - journal-network
+
+  patient-service:
+    build:
+      context: ./patient-service
+    container_name: patient-service
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/patient_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8082:8082"
+    networks:
+      - journal-network
+
+  message-service:
+    build:
+      context: ./message-service
+    container_name: message-service
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/message_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8083:8083"
+    networks:
+      - journal-network
+
+  image-service:
+    build:
+      context: ./image-service
+    container_name: image-service
+    restart: unless-stopped
+    environment:
+      PORT: 8084
+      DATA_DIR: /app/data
+    ports:
+      - "8084:8084"
+    volumes:
+      - image_data:/app/data
+    networks:
+      - journal-network
+
+  search-service:
+    build:
+      context: ./search-service
+    container_name: search-service
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      QUARKUS_DATASOURCE_REACTIVE_URL: mysql://mysql:3306/patient_db
+      QUARKUS_DATASOURCE_USERNAME: root
+      QUARKUS_DATASOURCE_PASSWORD: root
+    ports:
+      - "8085:8085"
+    networks:
+      - journal-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: journal-frontend
+    restart: unless-stopped
+    depends_on:
+      - user-service
+      - patient-service
+      - message-service
+      - image-service
+      - search-service
+    environment:
+      REACT_APP_USER_SERVICE_URL: http://localhost:8081
+      REACT_APP_PATIENT_SERVICE_URL: http://localhost:8082
+      REACT_APP_MESSAGE_SERVICE_URL: http://localhost:8083
+      REACT_APP_IMAGE_SERVICE_URL: http://localhost:8084
+      REACT_APP_SEARCH_SERVICE_URL: http://localhost:8085
+    ports:
+      - "3000:3000"
+    networks:
+      - journal-network
+
+networks:
+  journal-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  image_data:
