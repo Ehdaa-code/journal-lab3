@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: image-service
-          image: image-service:latest
+          image: registry.cloud.cbh.kth.se/deploy/journal-image1:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8084
@@ -25,6 +25,10 @@ spec:
               value: "8084"
             - name: DATA_DIR
               value: /app/data
+            - name: KEYCLOAK_ISSUER_URI
+              value: https://journal-keycloak1.app.cloud.cbh.kth.se/realms/journal-realm
+            - name: KEYCLOAK_JWKS_URI
+              value: https://journal-keycloak1.app.cloud.cbh.kth.se/realms/journal-realm/protocol/openid-connect/certs
           volumeMounts:
             - name: image-data
               mountPath: /app/data

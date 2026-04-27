@@ -16,21 +16,27 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: journal-frontend:latest
+          image: registry.cloud.cbh.kth.se/deploy/journal-frontend2:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
           env:
             - name: REACT_APP_USER_SERVICE_URL
-              value: http://localhost:8081
+              value: https://journal-user1.app.cloud.cbh.kth.se
             - name: REACT_APP_PATIENT_SERVICE_URL
-              value: http://localhost:8082
+              value: https://journal-patient1.app.cloud.cbh.kth.se
             - name: REACT_APP_MESSAGE_SERVICE_URL
-              value: http://localhost:8083
+              value: https://journal-message1.app.cloud.cbh.kth.se
             - name: REACT_APP_IMAGE_SERVICE_URL
-              value: http://localhost:8084
+              value: https://journal-image1.app.cloud.cbh.kth.se
             - name: REACT_APP_SEARCH_SERVICE_URL
-              value: http://localhost:8085
+              value: https://journal-search1.app.cloud.cbh.kth.se
+            - name: REACT_APP_KEYCLOAK_URL
+              value: https://journal-keycloak1.app.cloud.cbh.kth.se
+            - name: REACT_APP_KEYCLOAK_REALM
+              value: journal-realm
+            - name: REACT_APP_KEYCLOAK_CLIENT_ID
+              value: journal-frontend
           readinessProbe:
             tcpSocket:
               port: 3000
@@ -41,9 +47,6 @@ spec:
               port: 3000
             initialDelaySeconds: 20
             periodSeconds: 10
-
-
-
 
 
 

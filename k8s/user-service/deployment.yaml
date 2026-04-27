@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: user-service:latest
+          image: registry.cloud.cbh.kth.se/deploy/journal-user1:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
@@ -30,15 +30,17 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: MYSQL_ROOT_PASSWORD
+            - name: JWT_ISSUER_URI
+              value: https://journal-keycloak1.app.cloud.cbh.kth.se/realms/journal-realm
+            - name: JWT_JWK_SET_URI
+              value: https://journal-keycloak1.app.cloud.cbh.kth.se/realms/journal-realm/protocol/openid-connect/certs
           readinessProbe:
-            httpGet:
-              path: /api/users
+            tcpSocket:
               port: 8081
             initialDelaySeconds: 20
             periodSeconds: 5
           livenessProbe:
-            httpGet:
-              path: /api/users
+            tcpSocket:
               port: 8081
             initialDelaySeconds: 40
             periodSeconds: 10
