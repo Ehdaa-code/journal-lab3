@@ -295,6 +295,15 @@ jobs:
 
       - name: Build frontend
         working-directory: frontend
+        env:
+          REACT_APP_USER_SERVICE_URL: https://journal-user1.app.cloud.cbh.kth.se
+          REACT_APP_PATIENT_SERVICE_URL: https://journal-patient1.app.cloud.cbh.kth.se
+          REACT_APP_MESSAGE_SERVICE_URL: https://journal-message1.app.cloud.cbh.kth.se
+          REACT_APP_IMAGE_SERVICE_URL: https://journal-image1.app.cloud.cbh.kth.se
+          REACT_APP_SEARCH_SERVICE_URL: https://journal-search1.app.cloud.cbh.kth.se
+          REACT_APP_KEYCLOAK_URL: https://journal-keycloak1.app.cloud.cbh.kth.se
+          REACT_APP_KEYCLOAK_REALM: journal-realm
+          REACT_APP_KEYCLOAK_CLIENT_ID: journal-frontend
         run: npm run build
 
   build-docker-images:
@@ -331,7 +340,17 @@ jobs:
         run: docker build -t image-service:ci ./image-service
 
       - name: Build frontend image
-        run: docker build -t journal-frontend:ci ./frontend
+        run: |
+          docker build \
+            --build-arg REACT_APP_USER_SERVICE_URL=https://journal-user1.app.cloud.cbh.kth.se \
+            --build-arg REACT_APP_PATIENT_SERVICE_URL=https://journal-patient1.app.cloud.cbh.kth.se \
+            --build-arg REACT_APP_MESSAGE_SERVICE_URL=https://journal-message1.app.cloud.cbh.kth.se \
+            --build-arg REACT_APP_IMAGE_SERVICE_URL=https://journal-image1.app.cloud.cbh.kth.se \
+            --build-arg REACT_APP_SEARCH_SERVICE_URL=https://journal-search1.app.cloud.cbh.kth.se \
+            --build-arg REACT_APP_KEYCLOAK_URL=https://journal-keycloak1.app.cloud.cbh.kth.se \
+            --build-arg REACT_APP_KEYCLOAK_REALM=journal-realm \
+            --build-arg REACT_APP_KEYCLOAK_CLIENT_ID=journal-frontend \
+            -t journal-frontend2:ci ./frontend
 
       - name: Show built images
         run: docker images
@@ -361,39 +380,48 @@ jobs:
         with:
           context: ./user-service
           push: true
-          tags: registry.cloud.cbh.kth.se/journal-lab3/journal-user1:latest
+          tags: registry.cloud.cbh.kth.se/deploy/journal-user1:latest
 
       - name: Build and push journal-patient1
         uses: docker/build-push-action@v5
         with:
           context: ./patient-service
           push: true
-          tags: registry.cloud.cbh.kth.se/journal-lab3/journal-patient1:latest
+          tags: registry.cloud.cbh.kth.se/deploy/journal-patient1:latest
 
       - name: Build and push journal-message1
         uses: docker/build-push-action@v5
         with:
           context: ./message-service
           push: true
-          tags: registry.cloud.cbh.kth.se/journal-lab3/journal-message1:latest
+          tags: registry.cloud.cbh.kth.se/deploy/journal-message1:latest
 
       - name: Build and push journal-search1
         uses: docker/build-push-action@v5
         with:
           context: ./search-service
           push: true
-          tags: registry.cloud.cbh.kth.se/journal-lab3/journal-search1:latest
+          tags: registry.cloud.cbh.kth.se/deploy/journal-search1:latest
 
       - name: Build and push journal-image1
         uses: docker/build-push-action@v5
         with:
           context: ./image-service
           push: true
-          tags: registry.cloud.cbh.kth.se/journal-lab3/journal-image1:latest
+          tags: registry.cloud.cbh.kth.se/deploy/journal-image1:latest
 
       - name: Build and push journal-frontend2
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
-          tags: registry.cloud.cbh.kth.se/journal-lab3/journal-frontend2:latest
+          tags: registry.cloud.cbh.kth.se/deploy/journal-frontend2:latest
+          build-args: |
+            REACT_APP_USER_SERVICE_URL=https://journal-user1.app.cloud.cbh.kth.se
+            REACT_APP_PATIENT_SERVICE_URL=https://journal-patient1.app.cloud.cbh.kth.se
+            REACT_APP_MESSAGE_SERVICE_URL=https://journal-message1.app.cloud.cbh.kth.se
+            REACT_APP_IMAGE_SERVICE_URL=https://journal-image1.app.cloud.cbh.kth.se
+            REACT_APP_SEARCH_SERVICE_URL=https://journal-search1.app.cloud.cbh.kth.se
+            REACT_APP_KEYCLOAK_URL=https://journal-keycloak1.app.cloud.cbh.kth.se
+            REACT_APP_KEYCLOAK_REALM=journal-realm
+            REACT_APP_KEYCLOAK_CLIENT_ID=journal-frontend
