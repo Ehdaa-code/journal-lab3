@@ -468,7 +468,8 @@ jobs:
       - name: Verify Kubernetes context
         run: |
           kubectl config current-context
-          kubectl cluster-info
+          kubectl get deployment -n ${{ env.K8S_NAMESPACE }}
+          kubectl auth can-i patch deployment -n ${{ env.K8S_NAMESPACE }}
 
       - name: Update deployment images
         run: |
