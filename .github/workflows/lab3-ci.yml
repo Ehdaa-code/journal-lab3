@@ -456,10 +456,19 @@ jobs:
           version: latest
 
       - name: Configure kubeconfig
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG }}
         run: |
+          test -n "$KUBECONFIG_CONTENT"
           mkdir -p "$HOME/.kube"
-          printf '%s' "${{ secrets.KUBECONFIG }}" > "$HOME/.kube/config"
+          printf '%s' "$KUBECONFIG_CONTENT" > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
+          echo "KUBECONFIG=$HOME/.kube/config" >> "$GITHUB_ENV"
+
+      - name: Verify Kubernetes context
+        run: |
+          kubectl config current-context
+          kubectl cluster-info
 
       - name: Update deployment images
         run: |
