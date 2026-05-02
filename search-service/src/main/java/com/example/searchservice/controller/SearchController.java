@@ -4,6 +4,7 @@ package com.example.searchservice.controller;
 import com.example.searchservice.service.SearchService;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 
 @Path("/api/search")
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed({"DOCTOR", "STAFF", "ADMIN"})
 public class SearchController {
 
     @Inject

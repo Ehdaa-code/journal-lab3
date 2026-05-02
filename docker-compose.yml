@@ -1,6 +1,21 @@
 version: "3.9"
 
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: journal-keycloak
+    restart: unless-stopped
+    command: start-dev --http-port=8090 --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./local-dev/keycloak/journal-realm.json:/opt/keycloak/data/import/journal-realm.json:ro
+    networks:
+      - journal-network
+
   mysql:
     image: mysql:8.4
     container_name: journal-mysql
@@ -22,10 +37,13 @@ services:
     restart: unless-stopped
     depends_on:
       - mysql
+      - keycloak
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/user_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      JWT_ISSUER_URI: http://localhost:8090/realms/journal-realm
+      JWT_JWK_SET_URI: http://keycloak:8090/realms/journal-realm/protocol/openid-connect/certs
     ports:
       - "8081:8081"
     networks:
@@ -38,10 +56,13 @@ services:
     restart: unless-stopped
     depends_on:
       - mysql
+      - keycloak
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/patient_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      JWT_ISSUER_URI: http://localhost:8090/realms/journal-realm
+      JWT_JWK_SET_URI: http://keycloak:8090/realms/journal-realm/protocol/openid-connect/certs
     ports:
       - "8082:8082"
     networks:
@@ -54,10 +75,13 @@ services:
     restart: unless-stopped
     depends_on:
       - mysql
+      - keycloak
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/message_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+      JWT_ISSUER_URI: http://localhost:8090/realms/journal-realm
+      JWT_JWK_SET_URI: http://keycloak:8090/realms/journal-realm/protocol/openid-connect/certs
     ports:
       - "8083:8083"
     networks:
@@ -71,6 +95,8 @@ services:
     environment:
       PORT: 8084
       DATA_DIR: /app/data
+      KEYCLOAK_ISSUER_URI: http://localhost:8090/realms/journal-realm
+      KEYCLOAK_JWKS_URI: http://keycloak:8090/realms/journal-realm/protocol/openid-connect/certs
     ports:
       - "8084:8084"
     volumes:
@@ -85,10 +111,13 @@ services:
     restart: unless-stopped
     depends_on:
       - mysql
+      - keycloak
     environment:
       QUARKUS_DATASOURCE_REACTIVE_URL: mysql://mysql:3306/patient_db
       QUARKUS_DATASOURCE_USERNAME: root
       QUARKUS_DATASOURCE_PASSWORD: root
+      JWT_ISSUER_URI: http://localhost:8090/realms/journal-realm
+      JWT_JWK_SET_URI: http://keycloak:8090/realms/journal-realm/protocol/openid-connect/certs
     ports:
       - "8085:8085"
     networks:
@@ -97,6 +126,15 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        REACT_APP_USER_SERVICE_URL: http://localhost:8081
+        REACT_APP_PATIENT_SERVICE_URL: http://localhost:8082
+        REACT_APP_MESSAGE_SERVICE_URL: http://localhost:8083
+        REACT_APP_IMAGE_SERVICE_URL: http://localhost:8084
+        REACT_APP_SEARCH_SERVICE_URL: http://localhost:8085
+        REACT_APP_KEYCLOAK_URL: http://localhost:8090
+        REACT_APP_KEYCLOAK_REALM: journal-realm
+        REACT_APP_KEYCLOAK_CLIENT_ID: journal-frontend
     container_name: journal-frontend
     restart: unless-stopped
     depends_on:
@@ -105,12 +143,16 @@ services:
       - message-service
       - image-service
       - search-service
+      - keycloak
     environment:
       REACT_APP_USER_SERVICE_URL: http://localhost:8081
       REACT_APP_PATIENT_SERVICE_URL: http://localhost:8082
       REACT_APP_MESSAGE_SERVICE_URL: http://localhost:8083
       REACT_APP_IMAGE_SERVICE_URL: http://localhost:8084
       REACT_APP_SEARCH_SERVICE_URL: http://localhost:8085
+      REACT_APP_KEYCLOAK_URL: http://localhost:8090
+      REACT_APP_KEYCLOAK_REALM: journal-realm
+      REACT_APP_KEYCLOAK_CLIENT_ID: journal-frontend
     ports:
       - "3000:3000"
     networks:

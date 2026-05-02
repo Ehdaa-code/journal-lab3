@@ -7,7 +7,12 @@ import DoctorDashboard from "./pages/DoctorDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 import NotFoundPage from "./pages/NotFoundPage";
 
-import { loginUser, registerUser } from "./services/authService";
+import {
+  initializeSession,
+  loginUser,
+  logoutUser,
+  syncCurrentUser
+} from "./services/authService";
 import {
   createPatient,
   getPatientById,
@@ -25,7 +30,7 @@ import {
 } from "./services/patientService";
 
 export default function App() {
-  const [screen, setScreen] = useState("login");
+  const [screen, setScreen] = useState("loading");
   const [currentView, setCurrentView] = useState("dashboard");
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
@@ -37,12 +42,7 @@ export default function App() {
   const [patientOwnJournal, setPatientOwnJournal] = useState(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("journal_user");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setUser(parsed);
-      setScreen("app");
-    }
+    bootstrapAuth();
   }, []);
 
   useEffect(() => {
@@ -50,6 +50,26 @@ export default function App() {
       initializeUserData(user);
     }
   }, [user]);
+
+  async function bootstrapAuth() {
+    try {
+      setError("");
+      const authenticated = await initializeSession();
+
+      if (!authenticated) {
+        setScreen("login");
+        return;
+      }
+
+      const syncedUser = await syncCurrentUser();
+      setUser(syncedUser);
+      localStorage.setItem("journal_user", JSON.stringify(syncedUser));
+      setScreen("app");
+    } catch (e) {
+      setError(e.message);
+      setScreen("login");
+    }
+  }
 
   async function initializeUserData(currentUser) {
     try {
@@ -76,7 +96,7 @@ export default function App() {
         setPatientOwnJournal(journal);
       }
 
-      if (currentUser.role === "DOCTOR") {
+      if (currentUser.role === "DOCTOR" || currentUser.role === "ADMIN") {
         const allPatients = await getAllPatients();
         setPatients(allPatients);
 
@@ -103,36 +123,24 @@ export default function App() {
   async function reloadPatientList() {
     if (!user) return;
 
-    if (user.role === "DOCTOR" || user.role === "STAFF") {
+    if (user.role === "DOCTOR" || user.role === "STAFF" || user.role === "ADMIN") {
       const allPatients = await getAllPatients();
       setPatients(allPatients);
     }
   }
 
-  async function handleLogin(payload) {
+  async function handleLogin() {
     try {
       setError("");
-      const response = await loginUser(payload);
-      setUser(response.user);
-      localStorage.setItem("journal_user", JSON.stringify(response.user));
-      setScreen("app");
+      await loginUser();
     } catch (e) {
       setError(e.message);
     }
   }
 
-  async function handleRegister(payload) {
-    try {
-      setError("");
-      await registerUser(payload);
-      setScreen("login");
-    } catch (e) {
-      setError(e.message);
-    }
-  }
-
-  function handleLogout() {
+  async function handleLogout() {
     localStorage.removeItem("journal_user");
+    sessionStorage.removeItem("journal_access_token");
     setUser(null);
     setScreen("login");
     setCurrentView("dashboard");
@@ -142,6 +150,7 @@ export default function App() {
     setSelectedPatientJournal(null);
     setPatientOwnJournal(null);
     setError("");
+    await logoutUser();
   }
 
   async function handleSelectPatient(patientId) {
@@ -220,6 +229,17 @@ export default function App() {
     handleSelectPatient(patientId);
   }
 
+  if (screen === "loading") {
+    return (
+      <div className="container">
+        <div className="card">
+          <p>Laddar autentisering...</p>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+        </div>
+      </div>
+    );
+  }
+
   if (screen === "login") {
     return (
       <LoginPage
@@ -236,12 +256,10 @@ export default function App() {
   if (screen === "register") {
     return (
       <RegisterPage
-        onRegister={handleRegister}
         onGoLogin={() => {
           setError("");
           setScreen("login");
         }}
-        error={error}
       />
     );
   }
@@ -296,7 +314,7 @@ export default function App() {
         />
       )}
 
-      {user.role === "STAFF" && (
+      {(user.role === "STAFF" || user.role === "ADMIN") && (
         <StaffDashboard
           currentUser={user}
           currentView={currentView}

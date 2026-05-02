@@ -1,51 +1,39 @@
 import { USER_SERVICE_URL } from "../api/urls";
+import { authFetch } from "./httpService";
+import {
+  initializeKeycloak,
+  loginWithKeycloak,
+  logoutFromKeycloak
+} from "./keycloakService";
 
-export async function loginUser(payload) {
-  const response = await fetch(`${USER_SERVICE_URL}/api/users/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    let message = "Login failed";
-    try {
-      const err = await response.json();
-      message = err.message || message;
-    } catch (_) {}
-    throw new Error(message);
-  }
-
-  return response.json();
+export async function initializeSession() {
+  return initializeKeycloak();
 }
 
-export async function registerUser(payload) {
-  const response = await fetch(`${USER_SERVICE_URL}/api/users/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+export async function loginUser() {
+  return loginWithKeycloak();
+}
 
+export async function logoutUser() {
+  return logoutFromKeycloak();
+}
+
+export async function syncCurrentUser() {
+  const response = await authFetch(`${USER_SERVICE_URL}/api/users/me`);
   if (!response.ok) {
-    let message = "Registration failed";
-    try {
-      const err = await response.json();
-      message = err.message || message;
-    } catch (_) {}
-    throw new Error(message);
+    throw new Error("Failed to sync current user");
   }
-
   return response.json();
 }
 
 export async function getUsersByRole(role) {
-  const response = await fetch(`${USER_SERVICE_URL}/api/users/role/${role}`);
+  const response = await authFetch(`${USER_SERVICE_URL}/api/users/role/${role}`);
   if (!response.ok) throw new Error("Failed to fetch users by role");
   return response.json();
 }
 
 export async function getAllUsers() {
-  const response = await fetch(`${USER_SERVICE_URL}/api/users`);
+  const response = await authFetch(`${USER_SERVICE_URL}/api/users`);
   if (!response.ok) throw new Error("Failed to fetch users");
   return response.json();
 }

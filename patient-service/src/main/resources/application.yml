@@ -19,3 +19,9 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8090/realms/journal-realm}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8090/realms/journal-realm/protocol/openid-connect/certs}

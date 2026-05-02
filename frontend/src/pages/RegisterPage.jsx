@@ -1,12 +1,12 @@
-// RegisterPage.jsx
 import React from "react";
-import RegisterForm from "../components/RegisterForm";
 
-export default function RegisterPage({ onRegister, onGoLogin, error }) {
+export default function RegisterPage({ onGoLogin }) {
   return (
     <div className="container">
-      <RegisterForm onSubmit={onRegister} error={error} />
       <div className="card">
+        <h2 className="title">Användare hanteras i Keycloak</h2>
+        <p>För den här labben skapas eller importeras användare i Keycloak, inte i frontendens gamla registreringsformulär.</p>
+        <p>Lokala demoanvändare finns i realm-importen: `patient1`, `doctor1`, `staff1`, `admin1`.</p>
         <button onClick={onGoLogin}>Tillbaka till login</button>
       </div>
     </div>

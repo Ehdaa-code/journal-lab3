@@ -1,38 +1,19 @@
 // LoginForm.jsx
-import React, { useState } from "react";
+import React from "react";
 
 export default function LoginForm({ onSubmit, error }) {
-  const [usernameOrEmail, setUsernameOrEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   function handleSubmit(e) {
     e.preventDefault();
-    onSubmit({ usernameOrEmail, password });
+    onSubmit();
   }
 
   return (
     <div className="card">
-      <h2 className="title">Login</h2>
+      <h2 className="title">Login with Keycloak</h2>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username eller email</label>
-          <input
-            style={{ width: "100%" }}
-            value={usernameOrEmail}
-            onChange={(e) => setUsernameOrEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Lösenord</label>
-          <input
-            type="password"
-            style={{ width: "100%" }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        <p>Autentisering sker nu via Keycloak. Efter inloggning synkas din Keycloak-identitet till exakt en lokal user-post.</p>
         {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Logga in</button>
+        <button type="submit">Logga in med Keycloak</button>
       </form>
     </div>
   );

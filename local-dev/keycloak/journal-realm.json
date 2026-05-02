@@ -1,0 +1,129 @@
+{
+  "realm": "journal-realm",
+  "enabled": true,
+  "displayName": "Journal Realm",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "PATIENT"
+      },
+      {
+        "name": "DOCTOR"
+      },
+      {
+        "name": "STAFF"
+      },
+      {
+        "name": "ADMIN"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "journal-frontend",
+      "name": "journal-frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*",
+        "http://host.docker.internal:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://host.docker.internal:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "roles"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "patient1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Pat",
+      "lastName": "Patient",
+      "email": "patient1@journal.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "patient123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PATIENT"
+      ]
+    },
+    {
+      "username": "doctor1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Dana",
+      "lastName": "Doctor",
+      "email": "doctor1@journal.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "doctor123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "DOCTOR"
+      ]
+    },
+    {
+      "username": "staff1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Sam",
+      "lastName": "Staff",
+      "email": "staff1@journal.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "staff123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "STAFF"
+      ]
+    },
+    {
+      "username": "admin1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Alex",
+      "lastName": "Admin",
+      "email": "admin1@journal.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ]
+    }
+  ]
+}

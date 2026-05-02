@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,12 +28,17 @@ public class UserController {
         return ResponseEntity.ok(userService.login(request));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(userService.syncCurrentUser(jwt));
+    }
+
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
@@ -41,15 +48,20 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsersByRole(role));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/id/{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable Long id,
                                                    @RequestBody UpdateUserRequest request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/id/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/secure-test")
+    public ResponseEntity<String> secureTest() {
+        return ResponseEntity.ok("OK");
+    }
+
 }

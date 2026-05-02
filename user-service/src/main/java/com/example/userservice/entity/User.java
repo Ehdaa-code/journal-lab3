@@ -29,6 +29,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(unique = true)
+    private String keycloakSubject;
+
     @Column(nullable = false)
     private String passwordHash;
 

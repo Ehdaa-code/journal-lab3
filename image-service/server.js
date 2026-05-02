@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
+const { authenticateToken } = require("./middleware/authMiddleware");
 const imageRoutes = require("./routes/imageRoutes");
 const { ensureDataDirs } = require("./utils/ensureDataDirs");
 
@@ -16,7 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/images", imageRoutes);
+app.use("/api/images", authenticateToken, imageRoutes);
 
 app.use("/files", express.static(path.join(DATA_DIR, "images")));
 

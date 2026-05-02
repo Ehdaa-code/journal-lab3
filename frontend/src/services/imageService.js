@@ -1,8 +1,9 @@
 // imageService.js
 import { IMAGE_SERVICE_URL } from "../api/urls";
+import { authFetch } from "./httpService";
 
 export async function uploadImage(formData) {
-  const response = await fetch(`${IMAGE_SERVICE_URL}/api/images/upload`, {
+  const response = await authFetch(`${IMAGE_SERVICE_URL}/api/images/upload`, {
     method: "POST",
     body: formData
   });
@@ -11,19 +12,19 @@ export async function uploadImage(formData) {
 }
 
 export async function listImagesForPatient(patientId) {
-  const response = await fetch(`${IMAGE_SERVICE_URL}/api/images/patient/${patientId}`);
+  const response = await authFetch(`${IMAGE_SERVICE_URL}/api/images/patient/${patientId}`);
   if (!response.ok) throw new Error("Failed to list images");
   return response.json();
 }
 
 export async function getImageAnnotations(imageId) {
-  const response = await fetch(`${IMAGE_SERVICE_URL}/api/images/${imageId}/annotations`);
+  const response = await authFetch(`${IMAGE_SERVICE_URL}/api/images/${imageId}/annotations`);
   if (!response.ok) throw new Error("Failed to fetch annotations");
   return response.json();
 }
 
 export async function saveImageAnnotations(imageId, actions) {
-  const response = await fetch(`${IMAGE_SERVICE_URL}/api/images/${imageId}/annotate`, {
+  const response = await authFetch(`${IMAGE_SERVICE_URL}/api/images/${imageId}/annotate`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ actions })
