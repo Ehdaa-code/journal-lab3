@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY: registry.cloud.cbh.kth.se/deploy
+  REGISTRY: registry.cloud.cbh.kth.se/journal-lab3
   K8S_NAMESPACE: journal
   IMAGE_TAG: ${{ github.sha }}
 
